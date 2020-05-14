@@ -6,7 +6,9 @@ def send_notification(text):
 
 def timer(minutes=0, seconds=0):
     seconds += 60 * minutes
-    for _ in tqdm(range(seconds)):
+    for _ in tqdm(range(seconds),
+            desc="Progress: ",
+            bar_format='{desc} |{bar}| ({remaining} remaining)'):
         time.sleep(1.0)
     send_notification("Timer has run out")
 
