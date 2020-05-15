@@ -11,7 +11,8 @@ def set_terminal_title(title):
 def format_remaining_str(remaining, prefix="Pomodoro timer. Time remaining: "):
     seconds = remaining % 60
     minutes = remaining // 60
-    hours = remaining // 360
+    hours = minutes // 60
+    minutes %= 60
 
     l = [minutes, seconds]
     if hours > 0:
