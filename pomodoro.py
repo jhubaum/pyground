@@ -1,12 +1,27 @@
-import time, sys, subprocess
+import time, subprocess
 from tqdm import tqdm
+import argparse
+
+def setup_argparser():
+    parser = argparse.ArgumentParser(description='A simple pomodoro timer')
+    parser.add_argument('time', type=int, default=25,
+            help='the length of the timer in minutes')
+    parser.add_argument('--output-method', choices=['tqdm', 'window-title'], 
+            default='window-title',
+            help="""How is the remaining time shown? \n
+                    \n\ttqdm: using a progress bar\
+                    \n\twindow-title: the title of terminal is updated (default)""")
+
+    return parser
+
 
 def send_notification(text):
     subprocess.run(['notify-send', text])
 
 
 def set_terminal_title(title):
-    print(f'\033]2;{title}\a')
+    print(f'\033]2;{title}\a', end='', flush=True)
+
 
 def format_remaining_str(remaining, prefix="Pomodoro timer. Time remaining: "):
     seconds = remaining % 60
@@ -21,19 +36,23 @@ def format_remaining_str(remaining, prefix="Pomodoro timer. Time remaining: "):
     return prefix + ':'.join(map(lambda x: str(x).zfill(2), l))
 
 
-def timer(minutes=0, seconds=0):
+def timer(minutes=0, seconds=0, output='tqdm'):
     seconds += 60 * minutes
-    set_terminal_title(format_remaining_str(seconds))
-    for r in tqdm(range(seconds-1, -1, -1),
-            desc="Progress: ",
-            bar_format='{desc} |{bar}| ({remaining} remaining)'):
+    if output == 'window-title':
+        set_terminal_title(format_remaining_str(seconds))
+
+    timer_range = range(seconds-1, -1, -1)
+    if output == 'tqdm':
+        timer_range = tqdm(timer_range,
+                desc="Progress: ",
+                bar_format='{desc} |{bar}| ({remaining} remaining)')
+
+    for r in timer_range:
         time.sleep(1.0)
-        set_terminal_title(format_remaining_str(r))
+        if output == 'window-title':
+            set_terminal_title(format_remaining_str(r))
     send_notification("Timer has run out")
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print("Using default value of 25 minutes")
-        timer(minutes=25)
-    else:
-        timer(minutes=int(sys.argv[1]))
+    args = setup_argparser().parse_args()
+    timer(minutes=args.time, output=args.output_method)
