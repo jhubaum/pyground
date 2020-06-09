@@ -4,7 +4,7 @@ import argparse
 
 def setup_argparser():
     parser = argparse.ArgumentParser(description='A simple pomodoro timer')
-    parser.add_argument('time', type=int, default=25,
+    parser.add_argument('time', default=25, type=int,
             help='the length of the timer in minutes')
     parser.add_argument('--output-method', choices=['tqdm', 'window-title'], 
             default='window-title',
@@ -15,8 +15,8 @@ def setup_argparser():
     return parser
 
 
-def send_notification(text):
-    subprocess.run(['notify-send', text])
+def send_notification(summary, body=''):
+    subprocess.run(['notify-send', summary, body])
 
 
 def set_terminal_title(title):
@@ -40,6 +40,7 @@ def timer(minutes=0, seconds=0, output='tqdm'):
     seconds += 60 * minutes
     if output == 'window-title':
         set_terminal_title(format_remaining_str(seconds))
+        print("Started timer...")
 
     timer_range = range(seconds-1, -1, -1)
     if output == 'tqdm':
@@ -51,7 +52,7 @@ def timer(minutes=0, seconds=0, output='tqdm'):
         time.sleep(1.0)
         if output == 'window-title':
             set_terminal_title(format_remaining_str(r))
-    send_notification("Timer has run out")
+    send_notification("Take a break", "The timer has run out")
 
 if __name__ == '__main__':
     args = setup_argparser().parse_args()
