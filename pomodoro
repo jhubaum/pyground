@@ -1,12 +1,16 @@
-import time, subprocess
+#! /usr/bin/env python
+
+import time
+import subprocess
 from tqdm import tqdm
 import argparse
 import sys
 
+
 def setup_argparser():
     parser = argparse.ArgumentParser(description='A simple pomodoro timer')
     parser.add_argument('time', default=25, type=int,
-            help='the length of the timer in minutes')
+                        help='the length of the timer in minutes')
     return parser
 
 
@@ -14,7 +18,8 @@ def send_notification(summary, body=''):
     if sys.platform == "linux":
         subprocess.run(['notify-send', summary, body])
     elif sys.platform == "darwin":
-        subprocess.run(["osascript", "-e", f"display notification \"{summary}\" with title \"{body}\""])
+        subprocess.run(
+            ["osascript", "-e", f"display notification \"{summary}\" with title \"{body}\""])
     else:
         raise f"Unable to send notification on unknown system '{sys.platform}'"
 
@@ -49,6 +54,7 @@ def timer(minutes=0, seconds=0):
             set_terminal_title(format_remaining_str(seconds-i))
 
     send_notification("Take a break", "The timer has run out")
+
 
 if __name__ == '__main__':
     args = setup_argparser().parse_args()
